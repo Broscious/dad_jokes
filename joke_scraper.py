@@ -1,5 +1,6 @@
 import urllib2
 import sys
+import os.path
 
 import lxml.html as html
 import pandas as pd
@@ -67,15 +68,26 @@ def save_results(one_liners, joke_file, url_file):
             added_jokes.append((setup, punchline))
     url_df = pd.DataFrame(added_urls, columns=['url'])
     jokes_df = pd.DataFrame(added_jokes, columns=['Joke', 'Punchline'])
+
     with open(url_file, 'a') as f:
-        url_df.to_csv(f, index=False, header=False)
+        url_df.to_csv(f, index=False, header=False, encoding='utf-8')
 
     with open(joke_file, 'a') as f:
-        jokes_df.to_csv(f, index=False, header=False)
+        jokes_df.to_csv(f, index=False, header=False, encoding='utf-8')
+
+def ensure_existance(joke_file, url_file):
+    if not os.path.isfile(url_file):
+        with open(url_file, 'w') as f:
+            f.write(u'url\n')
+
+    if not os.path.isfile(joke_file):
+        with open(joke_file, 'w') as f:
+            f.write(u'Joke, Punchline\n')
 
 def main():
     joke_file = sys.argv[1]
     url_file = sys.argv[2]
+    ensure_existance(joke_file, url_file)
     urls = retrieve_urls()
     results = [retrieve_joke(url) for url in urls]
     one_liners = filter_results(urls, results)
